@@ -20,4 +20,5 @@ from . import views
 urlpatterns = [
     path('', views.ApiOverview, name='home'),
     path('create/', views.add_employee, name='add-employee'),
+    path('all_objects/', views.view_employees, name='view_employees'),
 ]

@@ -20,6 +20,28 @@ def ApiOverview(request):
   
     return Response(api_urls)
 
+@api_view(['GET'])
+def view_employees(request):
+    # checking for the parameters from the URL
+    if request.query_params:
+        try:
+            # Check if Employee object exists
+            queryset = Employee.objects.get(Name=request.query_params.get("Name"))
+        except Employee.DoesNotExist:
+            # there is no employee object with that given Name return proper error message
+            return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+        # items = Employee.objects.filter(**request.query_param.dict())
+        # Serialize Employee item from Django queryset object to JSON formatted data
+        read_serializer = AplusplusSerializer(queryset)
+    else:
+        queryset = Employee.objects.all()
+        # Serialize list of Employees item from Django queryset object to JSON formatted data
+        read_serializer = AplusplusSerializer(queryset, many=True)
+    # if there is something in items else raise error
+    if read_serializer:
+        return Response(read_serializer.data)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 def add_employee(request):
