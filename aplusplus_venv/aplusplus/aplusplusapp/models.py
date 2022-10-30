@@ -8,6 +8,9 @@ class Employee(models.Model):
     # Fields
     Name = models.CharField(max_length=255, null=False)
     Hourly_Rate = models.FloatField(null=False)
+    
+    def __str__(self) -> str:
+        return self.Name
 
     class Meta:
         db_table = "Employee"
