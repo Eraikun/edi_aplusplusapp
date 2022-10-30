@@ -7,6 +7,7 @@ class Employee(models.Model):
         )
     # Fields
     Name = models.CharField(max_length=255, null=False)
+    Team_Affiliation = models.CharField(max_length=255, null=True)
     Hourly_Rate = models.FloatField(null=False)
     
     def __str__(self) -> str:
