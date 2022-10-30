@@ -63,7 +63,7 @@ def add_employee(request):
     return Response(employee_serializer.errors, status=400)
 
 @api_view(['POST'])
-def update_item(request, id):
+def update_employee(request, id):
     try:
         # Check if Employee object exists
         Employee_item = Employee.objects.get(id=id)
@@ -83,4 +83,19 @@ def update_item(request, id):
         return Response(read_serializer.data, status=200)
     else:
         return Response(update_serializer.errors, status=400)
+
+@api_view(['DELETE'])
+def delete_employee(request, id):
+    try:
+        # Check if the Employee item the user wants to update exists
+        Employee_item = Employee.objects.get(id=id)
+    except Employee.DoesNotExist:
+        # If the Employee item does not exist, return an error response
+        return Response({'errors': 'Employee not found'}, status=400)
+    # Delete the chosen Employee item from the database
+    employee_name = Employee_item
+    Employee_item.delete()
+    # Return a HTTP response notifying that the Employee item was successfully deleted
+    return Response({'success': 'Employee {0} has been fired! :D'.format(employee_name)},status=204)
+
 

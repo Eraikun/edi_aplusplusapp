@@ -20,6 +20,7 @@ from . import views
 urlpatterns = [
     path('', views.ApiOverview, name='home'),
     path('create/', views.add_employee, name='add-employee'),
-    path('all_objects/', views.view_employees, name='view_employees'),
-    path('change_object/<int:id>/', views.update_item, name='update-item'),
+    path('all_employees/', views.view_employees, name='view_employees'),
+    path('change_object/<int:id>/', views.update_employee, name='update-employee'),
+    path('employee/<int:id>/delete/', views.delete_employee, name='delete-employee'),
 ]
