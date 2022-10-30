@@ -10,7 +10,7 @@ class AplusplusSerializer(serializers.ModelSerializer):
   def create(self, validated_data):
     # Once the request data has been validated, we can create a todo item instance in the database
     return Employee.objects.create(
-      text=validated_data.get('text')
+      Name=validated_data.get('Name'), Hourly_Rate=validated_data.get('Hourly_Rate')
     )
   class Meta:
     model = Employee

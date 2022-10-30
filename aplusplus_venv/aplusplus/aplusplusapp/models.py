@@ -13,4 +13,4 @@ class Employee(models.Model):
         return self.Name
 
     class Meta:
-        db_table = "Employee"
+        db_table = "employee"
