@@ -38,10 +38,10 @@ def view_employees(request):
         # Serialize list of Employees item from Django queryset object to JSON formatted data
         read_serializer = AplusplusSerializer(queryset, many=True)
     # if there is something in items else raise error
-    if read_serializer:
+    if read_serializer.data:
         return Response(read_serializer.data)
     else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(read_serializer.errors, status=400)
 
 @api_view(['POST'])
 def add_employee(request):
@@ -60,4 +60,27 @@ def add_employee(request):
         # Return a HTTP response with the newly created Employee item data
         return Response(read_serializer.data, status=201)
     # If the users POST data is not valid, return a 400 response with an error message
-    return Response(status=status.HTTP_404_NOT_FOUND)
+    return Response(employee_serializer.errors, status=400)
+
+@api_view(['POST'])
+def update_item(request, id):
+    try:
+        # Check if Employee object exists
+        Employee_item = Employee.objects.get(id=id)
+    except Employee.DoesNotExist:
+        # there is no employee object with that given ID return proper error message
+        return Response({'errors': 'Employee not found'}, status=400)
+    # Pass JSON data from user PUT request to serializer for validation
+    update_serializer = AplusplusSerializer(Employee_item, data=request.data)
+
+    # If data exists and is valid, proceed to save it into the database
+    if update_serializer.is_valid():
+        # Data was valid, update the Employee item in the database
+        # and save the item for response in a variable
+        Employee_item_object = update_serializer.save()# Serialize the Employee item from Python object to JSON format
+        read_serializer = AplusplusSerializer(Employee_item_object)
+        # Return a HTTP response with the newly updated Employee item
+        return Response(read_serializer.data, status=200)
+    else:
+        return Response(update_serializer.errors, status=400)
+

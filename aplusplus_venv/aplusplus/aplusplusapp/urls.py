@@ -21,4 +21,5 @@ urlpatterns = [
     path('', views.ApiOverview, name='home'),
     path('create/', views.add_employee, name='add-employee'),
     path('all_objects/', views.view_employees, name='view_employees'),
+    path('change_object/<int:id>/', views.update_item, name='update-item'),
 ]
