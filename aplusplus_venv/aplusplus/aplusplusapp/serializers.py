@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import fields
-from .models import Employee
+from .models import Employee, WorkArrangement
 
 
 class AplusplusSerializer(serializers.ModelSerializer):
@@ -21,3 +21,21 @@ class AplusplusSerializer(serializers.ModelSerializer):
       'Team_Affiliation',
       'Hourly_Rate'
     )
+
+class WASerializer(serializers.ModelSerializer):
+  employee = serializers.CharField(max_length=255)
+  workTitle = serializers.CharField(max_length=255)
+  def create(self, validated_data):
+    # Once the request data has been validated, we can create a todo item instance in the database
+    whichEmployee = Employee.objects.get(Name=validated_data.get('employee'))
+    return WorkArrangement.objects.create(
+      employee=whichEmployee, workTitle=validated_data.get('workTitle')
+    )
+  class Meta:
+    model = WorkArrangement
+    fields = (
+      'id',
+      'employee',
+      'workTitle',
+    )
+  

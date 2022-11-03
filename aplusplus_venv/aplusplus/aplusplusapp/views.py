@@ -2,20 +2,21 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Employee
-from .serializers import AplusplusSerializer
+from .models import Employee, WorkArrangement
+from .serializers import AplusplusSerializer, WASerializer
 import re, json
 
 
 @api_view(['GET'])
 def ApiOverview(request):
     api_urls = {
-        'all_items': '/',
-        'Search by Category': '/?category=category_name',
-        'Search by Subcategory': '/?subcategory=category_name',
-        'Add': '/create',
-        'Update': '/update/pk',
-        'Delete': '/item/pk/delete'
+        'all employees': 'api/employees/',
+        'Search by employee': 'api/employees/?Name=employee_name',
+        'Search by work title': 'api/employees/?workTitle=work_title',
+        'Add employee': 'api/create',
+        'Add work title': 'api/create_wa',
+        'Update employee': 'api/update_employee/pk',
+        'Delete employee': 'api/employee/item/pk/delete'
     }
   
     return Response(api_urls)
@@ -98,4 +99,56 @@ def delete_employee(request, id):
     # Return a HTTP response notifying that the Employee item was successfully deleted
     return Response({'success': 'Employee {0} has been fired! :D'.format(employee_name)},status=204)
 
+# Create routes für work assignments
+@api_view(['GET'])
+def view_was(request):
+    # checking for the parameters from the URL
+    if request.query_params:
+        try:
+            # Check if Employee object exists
+            queryset = WorkArrangement.objects.get(workTitle=request.query_params.get("workTitle"))
+            read_serializer = WASerializer(queryset)
+        except WorkArrangement.DoesNotExist:
+            # there is no employee object with that given Name return proper error message
+            return Response({'errors': 'WorkArrangement not found under the given workTitle.'}, status=400)
+        # items = Employee.objects.filter(**request.query_param.dict())
+        # Serialize Employee item from Django queryset object to JSON formatted data
+        wa_serializer = WASerializer(request.query_params)
+        
+    else:
+        queryset = WorkArrangement.objects.all()
+        # Serialize list of Employees item from Django queryset object to JSON formatted data
+        read_serializer = WASerializer(queryset, many=True)
+       
+    # if there is something in items else raise error
+    if read_serializer.data:
+        return Response(read_serializer.data)
+    else:
+        return Response(wa_serializer.errors, status=400)
 
+@api_view(['POST'])
+def create_wa(request):
+    wa_serializer = WASerializer(data=request.data)
+    # validate user POST data
+    if wa_serializer.is_valid():
+        # validating for already existing data
+        if WorkArrangement.objects.filter(workTitle=request.data['workTitle']).exists():
+        #if WorkArrangement.objects.filter(**request.data).exists():
+            # To-Do: Check if Name exists - can a madman be full-time and half-time WorkArrangement ._.
+            return Response({'errors': 'WorkArrangement under the given game already exists.'}, status=400)
+        # If user data is valid, create a new WorkArrangement item record in the database
+        wa_item_object = wa_serializer.create(wa_serializer.data)
+        # Serialize the new Employee item from a Python object to JSON format
+        read_serializer = WASerializer(wa_item_object)
+        # Return a HTTP response with the newly created Employee item data
+        return Response(read_serializer.data, status=201)
+    # If the users POST data is not valid, return a 400 response with an error message
+    return Response(wa_serializer.errors, status=400)
+
+@api_view(['POST'])
+def update_wa(request, id):
+    pass
+
+@api_view(['DELETE'])
+def delete_wa(request, id):
+    pass

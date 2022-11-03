@@ -36,19 +36,8 @@ class TeamLeader(models.Model):
     #A Team can only have one Leader
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
-class TeamEmployee(models.Model):
+class TeamMember(models.Model):
     """Represents a TeamEmployee."""
-    # Fields
-    id = models.AutoField(
-            primary_key=True
-        )
-    # 1:1 relation: one employee can be part of many teams
-    member = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='member')
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-
-
-class WorkArrangement(models.Model):
-    """Represents a Work Assignment which then worked by 1 team."""
     # Fields
     id = models.AutoField(
             primary_key=True
@@ -59,11 +48,25 @@ class WorkArrangement(models.Model):
         PT75 = 'Part Time 75%'
         PT50 = 'Part Time 50%'
         PT25 = 'Part Time 25%'
-
-    employee = models.ForeignKey(TeamEmployee, on_delete=models.CASCADE, related_name='processed_by_employee')
-    # work title
-
-    # work title
-    workTitle = models.CharField(max_length=255, null=False)
+    # 1:1 relation: one employee can be part of many teams
+    member = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='member')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     # is employee works full time on this work assignment? 
     workedTime = models.CharField(max_length=255, choices=Time.choices)
+
+class WorkArrangement(models.Model):
+    """Represents a Work Assignment which then worked by 1 team."""
+    # Fields
+    #id = models.AutoField(
+    #        primary_key=True
+    #    )
+    
+    #We could make a composite key which would consist of employee and workTitle together
+    # working employee
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='processed_by_employee')
+    # work title
+    workTitle = models.CharField(max_length=255, null=False)
+
+    class Meta:
+        db_table = "WorkArrangement"
+
