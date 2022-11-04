@@ -110,7 +110,6 @@ def view_was(request):
         try:
             # Check if Employee object exists
             queryset = WorkArrangement.objects.get(workTitle=request.query_params.get("workTitle"))
-            read_serializer = WASerializer(queryset)
         except WorkArrangement.DoesNotExist:
             # there is no employee object with that given Name return proper error message
             return Response({'errors': 'WorkArrangement not found under the given workTitle.'}, status=400)
@@ -121,11 +120,11 @@ def view_was(request):
     else:
         queryset = WorkArrangement.objects.all()
         # Serialize list of Employees item from Django queryset object to JSON formatted data
-        read_serializer = WASerializer(queryset, many=True)
+        wa_serializer = WASerializer(queryset, many=True)
        
     # if there is something in items else raise error
-    if read_serializer.data:
-        return Response(read_serializer.data)
+    if wa_serializer.data:
+        return Response(wa_serializer.data)
     else:
         return Response(wa_serializer.errors, status=400)
 
@@ -190,22 +189,21 @@ def view_team(request):
         try:
             # Check if Employee object exists
             queryset = Team.objects.get(teamTitle=request.query_params.get("teamTitle"))
-            team_serializer = TeamSerializer(queryset)
         except TeamSerializer.DoesNotExist:
             # there is no employee object with that given Name return proper error message
             return Response({'errors': 'WorkArrangement not found under the given workTitle.'}, status=400)
         # items = Employee.objects.filter(**request.query_param.dict())
         # Serialize Employee item from Django queryset object to JSON formatted data
-        read_serializer = TeamSerializer(request.query_params)
+        team_serializer = TeamSerializer(request.query_params)
         
     else:
         queryset = Team.objects.all()
         # Serialize list of Employees item from Django queryset object to JSON formatted data
-        read_serializer = TeamSerializer(queryset, many=True)
+        team_serializer = TeamSerializer(queryset, many=True)
        
     # if there is something in items else raise error
-    if read_serializer.data:
-        return Response(read_serializer.data)
+    if team_serializer.data:
+        return Response(team_serializer.data)
     else:
         return Response(team_serializer.errors, status=400)
 

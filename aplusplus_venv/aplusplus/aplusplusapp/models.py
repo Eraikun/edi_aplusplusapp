@@ -2,14 +2,25 @@ from enum import unique
 from django.db import models
 
 # Create your models here.
-class Employee(models.Model):
-    """Represents an employee who can work in multiple teams."""
+
+class Team(models.Model):
+    """Represents a Team."""
+    # Fields
     id = models.AutoField(
             primary_key=True
-        )
+    )
+    teamTitle = models.CharField(max_length=255, unique=True, null=False)
+    class Meta:
+        db_table = "team"
+
+class Employee(models.Model):
+    """Represents an employee who can work in multiple teams."""
+    #id = models.AutoField(
+    #        primary_key=True
+    #    )
     # Fields
     name = models.CharField(max_length=255, null=False, unique=True)
-    teamAffiliation = models.CharField(max_length=255, null=True)
+    teamAffiliation = models.OneToOneField(Team, on_delete=models.CASCADE, default=0,related_name='belongsTo')
     hourlyRate = models.FloatField(null=False)
     
     def __str__(self) -> str:
@@ -17,14 +28,6 @@ class Employee(models.Model):
 
     class Meta:
         db_table = "employee"
-
-class Team(models.Model):
-    """Represents a Team."""
-    # Fields
-    id = models.AutoField(
-            primary_key=True
-        )
-    teamTitle = models.CharField(max_length=255, null=False)
 
     
 class TeamLeader(models.Model):
@@ -36,6 +39,8 @@ class TeamLeader(models.Model):
     leader = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='leader')
     #A Team can only have one Leader
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    class Meta:
+        db_table = "teamLeader"
 
 class TeamMember(models.Model):
     """Represents a TeamEmployee."""
@@ -47,7 +52,8 @@ class TeamMember(models.Model):
     member = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='member')
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     # is employee works full time on this work assignment? 
-    
+    class Meta:
+        db_table = "teamMember"
 
 class WorkArrangement(models.Model):
     """Represents a Work Assignment which then worked by 1 team."""
@@ -71,5 +77,5 @@ class WorkArrangement(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='employee')
 
     class Meta:
-        db_table = "WorkArrangement"
+        db_table = "workArrangement"
 
