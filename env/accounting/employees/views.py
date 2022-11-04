@@ -1,12 +1,16 @@
+import json
 from ast import If
+
 from django.shortcuts import render
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Employee, Team, WorkArrangement, TeamLeader, TeamMember
-from rest_framework import viewsets
-from .serializers import EmployeeSerializer, TeamSerializer, WASerializer, TMSerializer, TLSerializer
-import json
 
+from .models import Employee, Team, TeamLeader, TeamMember, WorkArrangement
+from .serializers import (EmployeeSerializer, TeamSerializer, TLSerializer,
+                          TMSerializer, WASerializer)
+
+# a simple function which takes query employee elements and return their payment as value
 def calculate_payment(_employee):
     payment = 0.0
     #we need to match employee with projects he is working on
