@@ -43,17 +43,11 @@ class TeamMember(models.Model):
     id = models.AutoField(
             primary_key=True
         )
-    class Time(models.TextChoices):
-        FT = 'Full Time'
-        PT = 'Part Time'
-        PT75 = 'Part Time 75%'
-        PT50 = 'Part Time 50%'
-        PT25 = 'Part Time 25%'
     # 1:1 relation: one employee can be part of many teams
     member = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='member')
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     # is employee works full time on this work assignment? 
-    workedTime = models.CharField(max_length=255, choices=Time.choices)
+    
 
 class WorkArrangement(models.Model):
     """Represents a Work Assignment which then worked by 1 team."""
@@ -64,9 +58,17 @@ class WorkArrangement(models.Model):
     
     #We could make a composite key which would consist of employee and workTitle together
     # working employee
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='employee')
-    # work title
+    # work duration
+    WA_CHOICES = [
+    ('FT', 'Full Time'),
+    ('PT', 'Part Time 100%'),
+    ('PT75', 'Part Time 75%'),
+    ('PT50', 'Part Time 50%'),
+    ('PT25', 'Part Time 25%'),
+   ]
     workTitle = models.CharField(max_length=255, null=False)
+    workedTime = models.CharField(max_length=255, default='Full Time',choices=WA_CHOICES)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='employee')
 
     class Meta:
         db_table = "WorkArrangement"

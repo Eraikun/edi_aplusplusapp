@@ -24,14 +24,15 @@ class WASerializer(serializers.ModelSerializer):
   def create(self, validated_data):
     # Once the request data has been validated, we can create a todo item instance in the database
     return WorkArrangement.objects.create(
-      workTitle=validated_data.get('workTitle'), employee=Employee.objects.get(id=validated_data.get('employee'))
+      workTitle=validated_data.get('workTitle'), workedTime=validated_data.get('workedTime'), employee=Employee.objects.get(id=validated_data.get('employee'))
     )
   def update(self, instance, validated_data):
     instance.workTitle = validated_data.get('workTitle', instance.workTitle)
+    instance.workedTime = validated_data.get('workedTime', instance.workedTime)
     instance.employee = validated_data.get('employee', instance.employee)
     instance.save()
     return instance
   class Meta:
     model = WorkArrangement
-    fields = ['workTitle', 'employee']
+    fields = ['workTitle', 'workedTime' ,'employee']
   
