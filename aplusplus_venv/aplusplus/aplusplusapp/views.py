@@ -196,7 +196,7 @@ def view_team(request):
             return Response({'errors': 'WorkArrangement not found under the given workTitle.'}, status=400)
         # items = Employee.objects.filter(**request.query_param.dict())
         # Serialize Employee item from Django queryset object to JSON formatted data
-        team_serializer = TeamSerializer(request.query_params)
+        read_serializer = TeamSerializer(request.query_params)
         
     else:
         queryset = Team.objects.all()
@@ -211,37 +211,31 @@ def view_team(request):
 
 @api_view(['POST'])
 def create_team(request):
-    wa_serializer = WASerializer(data=request.data)
+    team_serializer = TeamSerializer(data=request.data)
     # validate user POST data
-    if wa_serializer.is_valid():
-        # validating for already existing data
-        #if WorkArrangement.objects.filter(workTitle=request.data['workTitle']).exists():
-        #if WorkArrangement.objects.filter(**request.data).exists():
-            # To-Do: Check if Name exists - can a madman be full-time and half-time WorkArrangement ._.
-            #return Response({'errors': 'WorkArrangement under the given game already exists.'}, status=400)
-        # If user data is valid, create a new WorkArrangement item record in the database
-        wa_item_object = wa_serializer.create(wa_serializer.data)
+    if team_serializer.is_valid():
+        team_item = team_serializer.create(team_serializer.data)
         # Serialize the new Employee item from a Python object to JSON format
-        read_serializer = WASerializer(wa_item_object)
+        read_serializer = TeamSerializer(team_item)
         # Return a HTTP response with the newly created Employee item data
         return Response(read_serializer.data, status=201)
     # If the users POST data is not valid, return a 400 response with an error message
-    return Response(wa_serializer.errors, status=400)
+    return Response(team_serializer.errors, status=400)
 
 @api_view(['POST'])
 def update_team(request, id):
     try:
         # Check if Employee object exists
-        wa_item = WorkArrangement.objects.get(id=id)
-    except WorkArrangement.DoesNotExist:
+        team_item = Team.objects.get(id=id)
+    except Team.DoesNotExist:
         # there is no employee object with that given ID return proper error message
         return Response({'errors': 'Work arrangement not found'}, status=400)
     # Pass JSON data from user PUT request to serializer for validation
-    update_serializer = WASerializer(instance=wa_item, data=request.data)
+    update_serializer = TeamSerializer(instance=team_item, data=request.data)
     # If data exists and is valid, proceed to save it into the database
     if update_serializer.is_valid():
-        wa_item_object = update_serializer.save()# Serialize the Employee item from Python object to JSON format
-        read_serializer = WASerializer(wa_item_object)
+        team_item = update_serializer.save()# Serialize the Employee item from Python object to JSON format
+        read_serializer = TeamSerializer(team_item)
         # Return a HTTP response with the newly updated Employee item
         return Response(read_serializer.data, status=200)
     else:
@@ -251,13 +245,13 @@ def update_team(request, id):
 def delete_team(request, id):
     try:
         # Check if the Employee item the user wants to update exists
-        wa_item = WorkArrangement.objects.get(id=id)
-    except WorkArrangement.DoesNotExist:
+        team_item = Team.objects.get(id=id)
+    except Team.DoesNotExist:
         # If the Employee item does not exist, return an error response
         return Response({'errors': 'work arrangement not found'}, status=400)
     # Delete the chosen Employee item from the database
-    wa_item_name = WASerializer(wa_item)
-    wa_item.delete()
+    team_item_name = TeamSerializer(team_item)
+    team_item.delete()
     # Return a HTTP response notifying that the Employee item was successfully deleted
-    return Response({'success': 'Employee {0} has been deleted'.format(wa_item_name.data.get("workTitle"))},status=204)
+    return Response({'success': 'Team {0} has been deleted'.format(team_item_name.data.get("teamTitle"))},status=204)
     
