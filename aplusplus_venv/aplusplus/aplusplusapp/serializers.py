@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import fields
-from .models import Employee, WorkArrangement
+from .models import Employee, WorkArrangement, Team
 
 
 class AplusplusSerializer(serializers.ModelSerializer):
@@ -15,6 +15,11 @@ class AplusplusSerializer(serializers.ModelSerializer):
     )
   class Meta:
     model = Employee
+    fields = ('__all__')
+
+class TeamSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Team
     fields = ('__all__')
 
 class WASerializer(serializers.ModelSerializer):

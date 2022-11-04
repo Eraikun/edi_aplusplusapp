@@ -33,7 +33,7 @@ class TeamLeader(models.Model):
     id = models.AutoField(
             primary_key=True
         )
-    leader = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='leader')
+    leader = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='leader')
     #A Team can only have one Leader
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
@@ -44,7 +44,7 @@ class TeamMember(models.Model):
             primary_key=True
         )
     # 1:1 relation: one employee can be part of many teams
-    member = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='member')
+    member = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='member')
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     # is employee works full time on this work assignment? 
     

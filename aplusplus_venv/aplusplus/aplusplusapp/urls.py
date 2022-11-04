@@ -27,4 +27,8 @@ urlpatterns = [
     path('create_wa/', views.create_wa, name='add-wa'),
     path('update_wa/<int:id>/', views.update_wa, name='update-wa'),
     path('work_arrangements/<int:id>/delete/', views.delete_wa, name='delete-wa'),
+    path('team/', views.view_team, name='view_team'),
+    path('create_team/', views.create_team, name='add-team'),
+    path('update_team/<int:id>/', views.update_team, name='update-team'),
+    path('team/<int:id>/delete/', views.delete_team, name='delete-team'),
 ]
