@@ -5,37 +5,33 @@ from .models import Employee, WorkArrangement
 
 class AplusplusSerializer(serializers.ModelSerializer):
   # id = serializers.AutoField(primary_key=True)
-  Name = serializers.CharField(max_length=255)
-  Team_Affiliation = serializers.CharField(max_length=255)
-  Hourly_Rate = serializers.DecimalField(max_digits=6, decimal_places=2)
+  #name = serializers.CharField(max_length=255)
+  #teamAffiliation = serializers.CharField(max_length=255)
+  #hourlyRate = serializers.DecimalField(max_digits=6, decimal_places=2)
   def create(self, validated_data):
     # Once the request data has been validated, we can create a todo item instance in the database
     return Employee.objects.create(
-      Name=validated_data.get('Name'), Team_Affiliation=validated_data.get('Team_Affiliation'), Hourly_Rate=validated_data.get('Hourly_Rate')
+      **validated_data
     )
   class Meta:
     model = Employee
-    fields = (
-      'id',
-      'Name',
-      'Team_Affiliation',
-      'Hourly_Rate'
-    )
+    fields = ('__all__')
 
 class WASerializer(serializers.ModelSerializer):
-  employee = serializers.CharField(max_length=255)
-  workTitle = serializers.CharField(max_length=255)
+  #employee = serializers.CharField(max_length=255)
+  #workTitle = serializers.CharField(max_length=255)
+  #employee = AplusplusSerializer(source='employee', required=False)
   def create(self, validated_data):
     # Once the request data has been validated, we can create a todo item instance in the database
-    whichEmployee = Employee.objects.get(Name=validated_data.get('employee'))
     return WorkArrangement.objects.create(
-      employee=whichEmployee, workTitle=validated_data.get('workTitle')
+      workTitle=validated_data.get('workTitle'), employee=Employee.objects.get(id=validated_data.get('employee'))
     )
+  def update(self, instance, validated_data):
+    instance.workTitle = validated_data.get('workTitle', instance.workTitle)
+    instance.employee = validated_data.get('employee', instance.employee)
+    instance.save()
+    return instance
   class Meta:
     model = WorkArrangement
-    fields = (
-      'id',
-      'employee',
-      'workTitle',
-    )
+    fields = ['workTitle', 'employee']
   

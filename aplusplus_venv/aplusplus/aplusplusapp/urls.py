@@ -25,6 +25,6 @@ urlpatterns = [
     path('employee/<int:id>/delete/', views.delete_employee, name='delete-employee'),
     path('work_arrangements/', views.view_was, name='view_wa'),
     path('create_wa/', views.create_wa, name='add-wa'),
-    path('change_wa/<int:id>/', views.update_wa, name='update-wa'),
-    path('employee/<int:id>/delete/', views.delete_wa, name='delete-wa'),
+    path('update_wa/<int:id>/', views.update_wa, name='update-wa'),
+    path('work_arrangements/<int:id>/delete/', views.delete_wa, name='delete-wa'),
 ]

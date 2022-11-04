@@ -50,7 +50,7 @@ def add_employee(request):
     # validate user POST data
     if employee_serializer.is_valid():
         # validating for already existing data
-        if Employee.objects.filter(Name=request.data['Name']).exists():
+        if Employee.objects.filter(name=request.data['name']).exists():
         #if Employee.objects.filter(**request.data).exists():
             # To-Do: Check if Name exists - can a madman be full-time and half-time employee ._.
             return Response({'errors': 'Employee under the given game already exists.'}, status=400)
@@ -78,8 +78,11 @@ def update_employee(request, id):
     if update_serializer.is_valid():
         # Data was valid, update the Employee item in the database
         # and save the item for response in a variable
-        Employee_item_object = update_serializer.save()# Serialize the Employee item from Python object to JSON format
+        Employee_item_object = update_serializer.save()
+        print(Employee_item_object)
+        # Serialize the Employee item from Python object to JSON format
         read_serializer = AplusplusSerializer(Employee_item_object)
+        print(read_serializer)
         # Return a HTTP response with the newly updated Employee item
         return Response(read_serializer.data, status=200)
     else:
@@ -132,10 +135,10 @@ def create_wa(request):
     # validate user POST data
     if wa_serializer.is_valid():
         # validating for already existing data
-        if WorkArrangement.objects.filter(workTitle=request.data['workTitle']).exists():
+        #if WorkArrangement.objects.filter(workTitle=request.data['workTitle']).exists():
         #if WorkArrangement.objects.filter(**request.data).exists():
             # To-Do: Check if Name exists - can a madman be full-time and half-time WorkArrangement ._.
-            return Response({'errors': 'WorkArrangement under the given game already exists.'}, status=400)
+            #return Response({'errors': 'WorkArrangement under the given game already exists.'}, status=400)
         # If user data is valid, create a new WorkArrangement item record in the database
         wa_item_object = wa_serializer.create(wa_serializer.data)
         # Serialize the new Employee item from a Python object to JSON format
@@ -147,7 +150,22 @@ def create_wa(request):
 
 @api_view(['POST'])
 def update_wa(request, id):
-    pass
+    try:
+        # Check if Employee object exists
+        wa_item = WorkArrangement.objects.get(id=id)
+    except WorkArrangement.DoesNotExist:
+        # there is no employee object with that given ID return proper error message
+        return Response({'errors': 'Work arrangement not found'}, status=400)
+    # Pass JSON data from user PUT request to serializer for validation
+    update_serializer = WASerializer(instance=wa_item, data=request.data)
+    # If data exists and is valid, proceed to save it into the database
+    if update_serializer.is_valid():
+        wa_item_object = update_serializer.save()# Serialize the Employee item from Python object to JSON format
+        read_serializer = WASerializer(wa_item_object)
+        # Return a HTTP response with the newly updated Employee item
+        return Response(read_serializer.data, status=200)
+    else:
+        return Response(update_serializer.errors, status=400)
 
 @api_view(['DELETE'])
 def delete_wa(request, id):

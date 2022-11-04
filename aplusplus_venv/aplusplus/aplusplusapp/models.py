@@ -1,3 +1,4 @@
+from enum import unique
 from django.db import models
 
 # Create your models here.
@@ -7,12 +8,12 @@ class Employee(models.Model):
             primary_key=True
         )
     # Fields
-    Name = models.CharField(max_length=255, null=False)
-    Team_Affiliation = models.CharField(max_length=255, null=True)
-    Hourly_Rate = models.FloatField(null=False)
+    name = models.CharField(max_length=255, null=False, unique=True)
+    teamAffiliation = models.CharField(max_length=255, null=True)
+    hourlyRate = models.FloatField(null=False)
     
     def __str__(self) -> str:
-        return self.Name
+        return self.name
 
     class Meta:
         db_table = "employee"
@@ -63,7 +64,7 @@ class WorkArrangement(models.Model):
     
     #We could make a composite key which would consist of employee and workTitle together
     # working employee
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='processed_by_employee')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='employee')
     # work title
     workTitle = models.CharField(max_length=255, null=False)
 
