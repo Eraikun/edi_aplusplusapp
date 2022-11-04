@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'aplusplus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'accounting',
+        'NAME': 'accounting2',
         'USER': 'zenbook',
         'PASSWORD': 'Cyb3rg0th666!',
         'HOST': 'localhost',

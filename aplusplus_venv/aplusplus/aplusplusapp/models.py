@@ -9,7 +9,7 @@ class Team(models.Model):
     id = models.AutoField(
             primary_key=True
     )
-    teamTitle = models.CharField(max_length=255, unique=True, null=False)
+    teamTitle = models.CharField(max_length=255, unique=True, null=False, default="unassigned")
     class Meta:
         db_table = "team"
 
@@ -19,9 +19,9 @@ class Employee(models.Model):
             primary_key=True
         )
     # Fields
-    name = models.CharField(max_length=255, null=False, unique=True)
-    teamAffiliation = models.ForeignKey(Team, on_delete=models.CASCADE,related_name='teamAffiliation')
-    hourlyRate = models.FloatField(null=False)
+    name = models.CharField(max_length=255, null=False, default="Max Mustermann", unique=True)
+    teamAffiliation = models.ForeignKey(Team, on_delete=models.CASCADE, default=0, related_name='teamAffiliation')
+    hourlyRate = models.FloatField(null=False, default=0)
     
     def __str__(self) -> str:
         return self.name
@@ -36,9 +36,9 @@ class TeamLeader(models.Model):
     id = models.AutoField(
             primary_key=True
         )
-    leader = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='leader')
+    leader = models.OneToOneField(Team, on_delete=models.CASCADE, to_field='teamTitle', default="none", related_name='leader')
     #A Team can only have one Leader
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, default="none")
     class Meta:
         db_table = "teamLeader"
 
@@ -48,9 +48,7 @@ class TeamMember(models.Model):
     id = models.AutoField(
             primary_key=True
         )
-    # 1:1 relation: one employee can be part of many teams
-    member = models.OneToOneField(Employee, on_delete=models.CASCADE, to_field='name', related_name='member')
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, default="none")
     # is employee works full time on this work assignment? 
     class Meta:
         db_table = "teamMember"
@@ -72,7 +70,7 @@ class WorkArrangement(models.Model):
     ('PT50', 'Part Time 50%'),
     ('PT25', 'Part Time 25%'),
    ]
-    workTitle = models.CharField(max_length=255, null=False)
+    workTitle = models.CharField(max_length=255, null=False, default="Chillin")
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, related_name='employee')
     workedTime = models.CharField(max_length=255, default='Full Time',choices=WA_CHOICES)
     
