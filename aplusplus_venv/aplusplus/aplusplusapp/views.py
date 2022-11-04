@@ -176,7 +176,7 @@ def delete_wa(request, id):
         # If the Employee item does not exist, return an error response
         return Response({'errors': 'work arrangement not found'}, status=400)
     # Delete the chosen Employee item from the database
-    wa_item_name = wa_item
+    wa_item_name = WASerializer(wa_item)
     wa_item.delete()
     # Return a HTTP response notifying that the Employee item was successfully deleted
-    return Response({'success': 'Employee {0} has been fired! :D'.format(wa_item_name)},status=204)
+    return Response({'success': 'Employee {0} has been deleted'.format(wa_item_name.data.get("workTitle"))},status=204)
