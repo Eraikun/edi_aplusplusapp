@@ -97,10 +97,10 @@ def delete_employee(request, id):
         # If the Employee item does not exist, return an error response
         return Response({'errors': 'Employee not found'}, status=400)
     # Delete the chosen Employee item from the database
-    employee_name = Employee_item
+    employee_name = AplusplusSerializer(Employee_item)
     Employee_item.delete()
     # Return a HTTP response notifying that the Employee item was successfully deleted
-    return Response({'success': 'Employee {0} has been fired! :D'.format(employee_name)},status=204)
+    return Response({'success': 'Employee {0} has been fired! :D'.format(employee_name.data.get("name"))},status=204)
 
 # Create routes für work assignments
 @api_view(['GET'])
