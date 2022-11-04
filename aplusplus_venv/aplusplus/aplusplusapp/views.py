@@ -27,7 +27,7 @@ def view_employees(request):
     if request.query_params:
         try:
             # Check if Employee object exists
-            queryset = Employee.objects.get(Name=request.query_params.get("Name"))
+            queryset = Employee.objects.get(name=request.query_params.get("name"))
         except Employee.DoesNotExist:
             # there is no employee object with that given Name return proper error message
             return Response({'errors': 'Employee not found under the given Name.'}, status=400)
@@ -169,4 +169,14 @@ def update_wa(request, id):
 
 @api_view(['DELETE'])
 def delete_wa(request, id):
-    pass
+    try:
+        # Check if the Employee item the user wants to update exists
+        wa_item = WorkArrangement.objects.get(id=id)
+    except WorkArrangement.DoesNotExist:
+        # If the Employee item does not exist, return an error response
+        return Response({'errors': 'work arrangement not found'}, status=400)
+    # Delete the chosen Employee item from the database
+    wa_item_name = wa_item
+    wa_item.delete()
+    # Return a HTTP response notifying that the Employee item was successfully deleted
+    return Response({'success': 'Employee {0} has been fired! :D'.format(wa_item_name)},status=204)
