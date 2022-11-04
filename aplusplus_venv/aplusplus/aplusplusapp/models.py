@@ -15,12 +15,12 @@ class Team(models.Model):
 
 class Employee(models.Model):
     """Represents an employee who can work in multiple teams."""
-    #id = models.AutoField(
-    #        primary_key=True
-    #    )
+    id = models.AutoField(
+            primary_key=True
+        )
     # Fields
     name = models.CharField(max_length=255, null=False, unique=True)
-    teamAffiliation = models.OneToOneField(Team, on_delete=models.CASCADE, default=0,related_name='belongsTo')
+    teamAffiliation = models.ForeignKey(Team, on_delete=models.CASCADE,related_name='teamAffiliation')
     hourlyRate = models.FloatField(null=False)
     
     def __str__(self) -> str:
@@ -58,9 +58,9 @@ class TeamMember(models.Model):
 class WorkArrangement(models.Model):
     """Represents a Work Assignment which then worked by 1 team."""
     # Fields
-    #id = models.AutoField(
-    #        primary_key=True
-    #    )
+    id = models.AutoField(
+            primary_key=True
+        )
     
     #We could make a composite key which would consist of employee and workTitle together
     # working employee
@@ -73,8 +73,9 @@ class WorkArrangement(models.Model):
     ('PT25', 'Part Time 25%'),
    ]
     workTitle = models.CharField(max_length=255, null=False)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, related_name='employee')
     workedTime = models.CharField(max_length=255, default='Full Time',choices=WA_CHOICES)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='employee')
+    
 
     class Meta:
         db_table = "workArrangement"

@@ -50,10 +50,10 @@ def add_employee(request):
     # validate user POST data
     if employee_serializer.is_valid():
         # validating for already existing data
-        if Employee.objects.filter(name=request.data['name']).exists():
+        #if Employee.objects.filter(name=request.data['name']).exists():
         #if Employee.objects.filter(**request.data).exists():
             # To-Do: Check if Name exists - can a madman be full-time and half-time employee ._.
-            return Response({'errors': 'Employee under the given game already exists.'}, status=400)
+        #    return Response({'errors': 'Employee under the given game already exists.'}, status=400)
         # If user data is valid, create a new Employee item record in the database
         Employee_item_object = employee_serializer.create(employee_serializer.data)
         # Serialize the new Employee item from a Python object to JSON format
@@ -133,11 +133,6 @@ def create_wa(request):
     wa_serializer = WASerializer(data=request.data)
     # validate user POST data
     if wa_serializer.is_valid():
-        # validating for already existing data
-        #if WorkArrangement.objects.filter(workTitle=request.data['workTitle']).exists():
-        #if WorkArrangement.objects.filter(**request.data).exists():
-            # To-Do: Check if Name exists - can a madman be full-time and half-time WorkArrangement ._.
-            #return Response({'errors': 'WorkArrangement under the given game already exists.'}, status=400)
         # If user data is valid, create a new WorkArrangement item record in the database
         wa_item_object = wa_serializer.create(wa_serializer.data)
         # Serialize the new Employee item from a Python object to JSON format
