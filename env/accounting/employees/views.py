@@ -16,7 +16,7 @@ def calculate_payment(_employee):
     #we need to match employee with projects he is working on
     allProjects = WorkArrangement.objects.filter(workedOnBy=_employee.id)
     for project in allProjects:
-        payment += _employee.hourlyRate * project.workDuration
+        payment += _employee.hourlyRate * project.workDuration * 4
     #teamleader gets 10% bonus on top
     if TeamLeader.objects.filter(leader=_employee.id).exists():
         payment+= payment * 0.1
@@ -28,7 +28,8 @@ def list_employees(request):
     queryset = Employee.objects.all()
     for employee in queryset:
         employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
-    return render(request, 'list_employees.html',{'employees': employees})
+    searchTerm = request.GET.get('searchEmployee')
+    return render(request, 'list_employees.html',{'employees': employees, 'searchTerm':searchTerm})
 
 @api_view(['GET'])
 def ApiOverview(request):
@@ -230,11 +231,12 @@ def view_member(request):
 
 @api_view(['POST'])
 def create_member(request):
-    tm_serializer = TMSerializer(data=request.data)
+    #tm_serializer = TMSerializer(data=request.data)
+    tm_serializer = TMSerializer(data={'team': Team.objects.get(teamTitle=request.data.get("team", "")).id, 'member': Employee.objects.get(name=request.data.get("employee", "")).id})
     # validate user POST data
     if tm_serializer.is_valid():
         # If user data is valid, create a new WorkArrangement item record in the database
-        tm_item_object = tm_serializer.create(tm_serializer.data)
+        tm_item_object = tm_serializer.create({'team': Team.objects.get(teamTitle=request.data.get("team", "")), 'member': Employee.objects.get(name=request.data.get("employee", ""))})
         # Serialize the team member item from a Python object to JSON format
         read_serializer = TMSerializer(tm_item_object)
         # Return a HTTP response with the newly created team member item data
@@ -303,17 +305,17 @@ def view_leader(request):
 
 @api_view(['POST'])
 def create_leader(request):
-    tm_serializer = TLSerializer(data=request.data)
+    tl_serializer = TLSerializer(data={'team': Team.objects.get(teamTitle=request.data.get("team", "")).id, 'leader': Employee.objects.get(name=request.data.get("employee", "")).id})
     # validate user POST data
-    if tm_serializer.is_valid():
+    if tl_serializer.is_valid():
         # If user data is valid, create a new WorkArrangement item record in the database
-        tm_item_object = tm_serializer.create(tm_serializer.data)
+        tl_item_object = tl_serializer.create({'team': Team.objects.get(teamTitle=request.data.get("team", "")), 'leader': Employee.objects.get(name=request.data.get("employee", ""))})
         # Serialize the team leader item from a Python object to JSON format
-        read_serializer = TLSerializer(tm_item_object)
+        read_serializer = TLSerializer(tl_item_object)
         # Return a HTTP response with the newly created team leader item data
         return Response(read_serializer.data, status=201)
     # If the users POST data is not valid, return a 400 response with an error message
-    return Response(tm_serializer.errors, status=400)
+    return Response(tl_serializer.errors, status=400)
 
 @api_view(['POST'])
 def update_leader(request, id):

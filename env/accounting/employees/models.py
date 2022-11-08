@@ -34,8 +34,8 @@ class TeamLeader(models.Model):
 
 class TeamMember(models.Model):
     """Represents a TeamEmployee."""
-    team = models.OneToOneField(Team, on_delete = models.CASCADE)
-    member = models.ForeignKey(Employee, on_delete = models.CASCADE)
+    team = models.ForeignKey(Team, on_delete = models.CASCADE, related_name='team')
+    member = models.ForeignKey(Employee, on_delete = models.CASCADE, related_name='employee')
 
     def __str__(self):
         return self.member

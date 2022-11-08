@@ -24,3 +24,18 @@ class AddEmployeeTestCase(APITestCase):
         response = self.client.post('/api/teamleader/', {'name': 'Ömer', 'teamAffiliation': 1, 'hourlyRate':30.0})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    #self.detail_url: str = "factory:jobs-detail"
+
+    #self.resource = Resource.objects.create(**self.resource_data)
+
+    #self.job_data = {
+    #    "resource": self.resource,
+    #    "required_resource": 20,
+    #}
+
+    #def test_create(self) -> None:
+    #    response: Response = self.client.post(
+    #        self.list_url, data=self.job_data
+    #    )
+    #    print(response.data)
+    #    self.assertEqual(response.status_code, 201)

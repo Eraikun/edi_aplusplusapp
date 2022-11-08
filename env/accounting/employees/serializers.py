@@ -19,11 +19,15 @@ class WASerializer(serializers.ModelSerializer):
         fields = ('id', 'workTitle', 'workedOnBy', 'workDuration')
 
 class TMSerializer(serializers.ModelSerializer):
+    team = serializers.SlugRelatedField(slug_field='teamTitle', read_only="True")
+    member = serializers.SlugRelatedField(slug_field='name', read_only="True")
     class Meta:
         model = TeamMember
         fields = ('id', 'team', 'member')
 
 class TLSerializer(serializers.ModelSerializer):
+    team = serializers.SlugRelatedField(slug_field='teamTitle', read_only="True")
+    leader = serializers.SlugRelatedField(slug_field='name', read_only="True")
     class Meta:
         model = TeamLeader
         fields = ('id', 'team', 'leader')
