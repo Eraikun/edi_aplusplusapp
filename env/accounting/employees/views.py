@@ -23,6 +23,14 @@ def calculate_payment(_employee):
     return payment
 
 @api_view(['GET'])
+def list_employees(request):
+    employees=[]
+    queryset = Employee.objects.all()
+    for employee in queryset:
+        employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
+    return render(request, 'list_employees.html',{'employees': employees})
+
+@api_view(['GET'])
 def ApiOverview(request):
     api_urls = {
         'all employees': 'api/employees/',
