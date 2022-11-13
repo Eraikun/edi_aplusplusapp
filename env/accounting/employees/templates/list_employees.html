@@ -15,14 +15,14 @@
         </dl>
     {% endfor %}
     <h3>Search for a specific employee:</h3>
-    <form action="">
+    <form action="/list_employee/" method="post">
+        {% csrf_token %}
         <div class="mb-3">
           <label class="form-label">Search employee:</label>
-          <input type="text" name="searchEmployee">
+          <input idtype="text" name="searchTerm" title='employee name' maxlength="100" required>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
-      Searching for {{ searchTerm }}
 </div>
 </body>
 </html>

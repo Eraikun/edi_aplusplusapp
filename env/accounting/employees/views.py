@@ -5,11 +5,25 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.template import RequestContext
 
+from .forms import NameForm
 from .models import Employee, Team, TeamLeader, TeamMember, WorkArrangement
 from .serializers import (EmployeeSerializer, TeamSerializer, TLSerializer,
                           TMSerializer, WASerializer)
 
+@api_view(['GET'])
+def ApiOverview(request):
+    api_urls = {
+        'all employees': 'api/employees/',
+        'Search by employee': 'api/employees/?Name=employee_name',
+        'Search by work title': 'api/employees/?workTitle=work_title',
+        'Add employee': 'api/create',
+        'Add work title': 'api/create_wa',
+        'Update employee': 'api/update_employee/pk',
+        'Delete employee': 'api/employee/item/pk/delete'
+    }
+    
 # a simple function which takes query employee elements and return their payment as value
 def calculate_payment(_employee):
     payment = 0.0
@@ -24,24 +38,31 @@ def calculate_payment(_employee):
 
 @api_view(['GET'])
 def list_employees(request):
+    print(request.method)
     employees=[]
     queryset = Employee.objects.all()
     for employee in queryset:
         employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
     searchTerm = request.GET.get('searchEmployee')
-    return render(request, 'list_employees.html',{'employees': employees, 'searchTerm':searchTerm})
+    return render(request, 'list_employees.html',{'employees': employees})
 
-@api_view(['GET'])
-def ApiOverview(request):
-    api_urls = {
-        'all employees': 'api/employees/',
-        'Search by employee': 'api/employees/?Name=employee_name',
-        'Search by work title': 'api/employees/?workTitle=work_title',
-        'Add employee': 'api/create',
-        'Add work title': 'api/create_wa',
-        'Update employee': 'api/update_employee/pk',
-        'Delete employee': 'api/employee/item/pk/delete'
-    }
+@api_view(['POST'])
+def list_employee(request):
+    # create JSON data to send as result with employee name and payment
+    try:
+        form = NameForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            #get the form data
+            searchTerm = form.cleaned_data["searchTerm"]
+            #search for the employee in the database
+            queryset = Employee.objects.get(name=searchTerm)
+            employee={"name":queryset.name, "monthly_payment":calculate_payment(queryset)}
+    except Employee.DoesNotExist:
+        # there is no employee object with that given Name return proper error message
+        return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+    print(employee)
+    return render(request, 'list_employees.html',{'employees': [employee]})
 
 @api_view(['GET'])
 def view_employees(request):
