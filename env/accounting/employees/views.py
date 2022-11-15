@@ -23,7 +23,7 @@ def ApiOverview(request):
         'Update employee': 'api/update_employee/pk',
         'Delete employee': 'api/employee/item/pk/delete'
     }
-    
+
 # a simple function which takes query employee elements and return their payment as value
 def calculate_payment(_employee):
     payment = 0.0
@@ -38,7 +38,6 @@ def calculate_payment(_employee):
 
 @api_view(['GET'])
 def list_employees(request):
-    print(request.method)
     employees=[]
     queryset = Employee.objects.all()
     for employee in queryset:
@@ -48,6 +47,8 @@ def list_employees(request):
 
 @api_view(['POST'])
 def list_employee(request):
+    employees=[]
+    jsonResponse = '{}'
     # create JSON data to send as result with employee name and payment
     try:
         form = NameForm(request.POST)
@@ -55,14 +56,24 @@ def list_employee(request):
         if form.is_valid():
             #get the form data
             searchTerm = form.cleaned_data["searchTerm"]
-            #search for the employee in the database
-            queryset = Employee.objects.get(name=searchTerm)
-            employee={"name":queryset.name, "monthly_payment":calculate_payment(queryset)}
+            try:
+                #search for the employee in the database
+                queryset = Employee.objects.get(name=searchTerm)
+                employee={"name":queryset.name, "monthly_payment":calculate_payment(queryset)}
+                return render(request, 'list_employees.html',{'employees': [employee]})
+            #if nothing found we could search for search term contains
+            except Employee.DoesNotExist:
+                queryset = Employee.objects.filter(name__contains=searchTerm)
+                for employee in queryset:
+                    #add every fitting query into the json response
+                    employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
+                print(employees,"lol")
+                return render(request, 'list_employees.html',{'employees': employees})
+            
     except Employee.DoesNotExist:
         # there is no employee object with that given Name return proper error message
         return Response({'errors': 'Employee not found under the given Name.'}, status=400)
-    print(employee)
-    return render(request, 'list_employees.html',{'employees': [employee]})
+    
 
 @api_view(['GET'])
 def view_employees(request):
