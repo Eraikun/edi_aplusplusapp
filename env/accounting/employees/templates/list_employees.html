@@ -15,14 +15,16 @@
         </dl>
     {% endfor %}
     <h3>Search for a specific employee:</h3>
-    <form action="/list_employee/" method="post">
+    <form action="/list_employee/" method="post" style="margin: 15px;">
         {% csrf_token %}
         <div class="mb-3">
           <label class="form-label">Search employee:</label>
           <input idtype="text" name="searchTerm" title='employee name' maxlength="100" required>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
+    </form>
+    
+    <button type="button" class="btn btn-primary"><a href="{% url 'list_employees' %}" style="text-decoration:none; background-color: none; color: white;">List employees</a></button>
 </div>
 </body>
 </html>
