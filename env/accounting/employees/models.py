@@ -16,6 +16,10 @@ class Employee(models.Model):
     teamAffiliation = models.ForeignKey(Team, on_delete = models.CASCADE)
     hourlyRate = models.FloatField()
     
+    #implementing salary into model
+    def get_salary(self):
+        return self.hourlyRate*8*5*4
+    
     def __str__(self) -> str:
         return self.name
 
@@ -47,6 +51,7 @@ class WorkArrangement(models.Model):
     workTitle = models.CharField(max_length = 255)
     workedOnBy = models.ForeignKey(Employee, on_delete = models.CASCADE)
     workDuration = models.IntegerField()
+    
     def __str__(self) -> str:
         return self.workTitle
     class Meta:
