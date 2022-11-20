@@ -37,7 +37,7 @@ def calculate_payment(_employee):
     return payment
 
 @api_view(['GET'])
-def list_employees(request):
+def view_employees(request):
     employees=[]
     queryset = Employee.objects.all()
     for employee in queryset:
@@ -48,7 +48,6 @@ def list_employees(request):
 @api_view(['POST'])
 def list_employee(request):
     employees=[]
-    jsonResponse = '{}'
     # create JSON data to send as result with employee name and payment
     try:
         form = NameForm(request.POST)
@@ -76,42 +75,31 @@ def list_employee(request):
     
 
 @api_view(['GET'])
-def view_employees(request):
+def list_employees(request):
     # create JSON data to send as result with employee name and payment
-    jsonResponse = '{}'
+    employees=[]
+    form = NameForm(request.GET)
+            #get the form data
+    print("about to get")
     # checking for the parameters from the URL
-    if request.query_params:
-        try:
-            queryset = Employee.objects.get(name=request.query_params.get("name"))
-            # python object to be appended to our response json
-            _temp1 = {queryset.name:calculate_payment(queryset)}
-            # we parse our json response
-            parsedJson = json.loads(jsonResponse)
-            parsedJson.update(_temp1)
-            jsonResponse = json.dumps(parsedJson)
-        except Employee.DoesNotExist:
-            # there is no employee object with that given Name return proper error message
-            return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+    if form.is_valid():
+        searchTerm = form.cleaned_data["searchTerm"]
+        if searchTerm:
+            try:
+                queryset = Employee.objects.get(name=searchTerm)
+                print("mySearchTerm",searchTerm)
+                employees.append({"name":queryset.name, "monthly_payment":calculate_payment(queryset)})
+            except Employee.DoesNotExist:
+                # there is no employee object with that given Name return proper error message
+                return Response({'errors': 'Employee not found under the given Name.'}, status=400)
         # Serialize Employee item from Django queryset object to JSON formatted data
-        read_serializer = EmployeeSerializer(queryset)
     else:
         queryset = Employee.objects.all()
         for employee in queryset:
-            # calculate all work hours 
-            calculate_payment(employee)
-            # python object to be appended to our response json
-            _temp1 = {employee.name:calculate_payment(employee)}
-            # we parse our json response
-            parsedJson = json.loads(jsonResponse)
-            parsedJson.update(_temp1)
-            jsonResponse = json.dumps(parsedJson)
+            employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
         # Serialize list of Employees item from Django queryset object to JSON formatted data
-        read_serializer = EmployeeSerializer(queryset, many=True)
     # if there is something in items else raise error
-    if read_serializer.data:
-        return Response(json.loads(jsonResponse))
-    else:
-        return Response(read_serializer.errors, status=400)
+    return render(request, 'list_employees.html',{'employees': employees})
 
 @api_view(['POST'])
 def add_employee(request):
