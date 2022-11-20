@@ -90,8 +90,11 @@ def list_employees(request):
                 print("mySearchTerm",searchTerm)
                 employees.append({"name":queryset.name, "monthly_payment":calculate_payment(queryset)})
             except Employee.DoesNotExist:
-                # there is no employee object with that given Name return proper error message
-                return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+                queryset = Employee.objects.filter(name__contains=searchTerm)
+                for employee in queryset:
+                    #add every fitting query into the json response
+                    employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
+                return render(request, 'list_employees.html',{'employees': employees})
         # Serialize Employee item from Django queryset object to JSON formatted data
     else:
         queryset = Employee.objects.all()
