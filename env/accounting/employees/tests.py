@@ -11,16 +11,26 @@ from .models import Employee, Team, TeamLeader, TeamMember, WorkArrangement
 from .serializers import (EmployeeSerializer, TeamSerializer, TLSerializer,
                           TMSerializer, WASerializer)
 
-class AddEmployeeTestCase(APITestCase):
-    # Using the standard RequestFactory API to create a form POST request
+
+class EmployeeTestCase(TestCase):
     def setUp(self):
-        self.employee = User.objects.create_user(username="erai", password="verybadpassword")
-        self.token = Token.objects.create(user=self.user)
-        self.api_authentication()
+        print('set up some employees')
+        t1 = Team.objects.create(teamTitle="winner")
+        Employee.objects.create(name= 'Don', teamAffiliation= t1, hourlyRate=12.0)
+        Employee.objects.create(name= 'Jan', teamAffiliation= t1, hourlyRate=19.0)
+    def test_employee_list(self):
+        print('testing employee information')
+        qS = Employee.objects.all()
+        # check if database successfully added both test employees
+        self.assertEqual(qS.count(),2)
+        e1 = Employee.objects.get(name = "Don")
+        e2 = Employee.objects.get(name = "Jan")
+        self.assertEqual(e1.get_salary(),e1.hourlyRate*8*5*4)
+        self.assertEqual(e2.get_salary(),e2.hourlyRate*8*5*4)
     def test_employee_get(self):
         response = self.client.get('/api/employees/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    def test_employee_post(self):
-        response = self.client.post('/api/teamleader/', {'name': 'Ömer', 'teamAffiliation': 1, 'hourlyRate':30.0})
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
+    #def test_employee_post(self):
+    #    t1 = Team.objects.create(teamTitle="procrastinater")
+    #    response = self.client.post('/api/teamleader/', {'name': 'Römer', 'teamAffiliation': t1.pk, 'hourlyRate':30.0})
+    #    self.assertEqual(response.status_code, status.HTTP_201_CREATED)

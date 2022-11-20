@@ -5,22 +5,12 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.template import RequestContext
 
+from .forms import NameForm
 from .models import Employee, Team, TeamLeader, TeamMember, WorkArrangement
 from .serializers import (EmployeeSerializer, TeamSerializer, TLSerializer,
                           TMSerializer, WASerializer)
-
-# a simple function which takes query employee elements and return their payment as value
-def calculate_payment(_employee):
-    payment = 0.0
-    #we need to match employee with projects he is working on
-    allProjects = WorkArrangement.objects.filter(workedOnBy=_employee.id)
-    for project in allProjects:
-        payment += _employee.hourlyRate * project.workDuration
-    #teamleader gets 10% bonus on top
-    if TeamLeader.objects.filter(leader=_employee.id).exists():
-        payment+= payment * 0.1
-    return payment
 
 @api_view(['GET'])
 def ApiOverview(request):
@@ -34,43 +24,82 @@ def ApiOverview(request):
         'Delete employee': 'api/employee/item/pk/delete'
     }
 
+# a simple function which takes query employee elements and return their payment as value
+def calculate_payment(_employee):
+    payment = 0.0
+    #we need to match employee with projects he is working on
+    allProjects = WorkArrangement.objects.filter(workedOnBy=_employee.id)
+    for project in allProjects:
+        payment += _employee.hourlyRate * project.workDuration * 4
+    #teamleader gets 10% bonus on top
+    if TeamLeader.objects.filter(leader=_employee.id).exists():
+        payment+= payment * 0.1
+    return payment
+
 @api_view(['GET'])
 def view_employees(request):
+    employees=[]
+    queryset = Employee.objects.all()
+    for employee in queryset:
+        employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
+    searchTerm = request.GET.get('searchEmployee')
+    return render(request, 'list_employees.html',{'employees': employees})
+
+@api_view(['POST'])
+def list_employee(request):
+    employees=[]
     # create JSON data to send as result with employee name and payment
-    jsonResponse = '{}'
+    try:
+        form = NameForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            #get the form data
+            searchTerm = form.cleaned_data["searchTerm"]
+            try:
+                #search for the employee in the database
+                queryset = Employee.objects.get(name=searchTerm)
+                employee={"name":queryset.name, "monthly_payment":calculate_payment(queryset)}
+                return render(request, 'list_employees.html',{'employees': [employee]})
+            #if nothing found we could search for search term contains
+            except Employee.DoesNotExist:
+                queryset = Employee.objects.filter(name__contains=searchTerm)
+                for employee in queryset:
+                    #add every fitting query into the json response
+                    employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
+                print(employees,"lol")
+                return render(request, 'list_employees.html',{'employees': employees})
+            
+    except Employee.DoesNotExist:
+        # there is no employee object with that given Name return proper error message
+        return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+    
+
+@api_view(['GET'])
+def list_employees(request):
+    # create JSON data to send as result with employee name and payment
+    employees=[]
+    form = NameForm(request.GET)
+            #get the form data
+    print("about to get")
     # checking for the parameters from the URL
-    if request.query_params:
-        try:
-            queryset = Employee.objects.get(name=request.query_params.get("name"))
-            # python object to be appended to our response json
-            _temp1 = {queryset.name:calculate_payment(queryset)}
-            # we parse our json response
-            parsedJson = json.loads(jsonResponse)
-            parsedJson.update(_temp1)
-            jsonResponse = json.dumps(parsedJson)
-        except Employee.DoesNotExist:
-            # there is no employee object with that given Name return proper error message
-            return Response({'errors': 'Employee not found under the given Name.'}, status=400)
+    if form.is_valid():
+        searchTerm = form.cleaned_data["searchTerm"]
+        if searchTerm:
+            try:
+                queryset = Employee.objects.get(name=searchTerm)
+                print("mySearchTerm",searchTerm)
+                employees.append({"name":queryset.name, "monthly_payment":calculate_payment(queryset)})
+            except Employee.DoesNotExist:
+                # there is no employee object with that given Name return proper error message
+                return Response({'errors': 'Employee not found under the given Name.'}, status=400)
         # Serialize Employee item from Django queryset object to JSON formatted data
-        read_serializer = EmployeeSerializer(queryset)
     else:
         queryset = Employee.objects.all()
         for employee in queryset:
-            # calculate all work hours 
-            calculate_payment(employee)
-            # python object to be appended to our response json
-            _temp1 = {employee.name:calculate_payment(employee)}
-            # we parse our json response
-            parsedJson = json.loads(jsonResponse)
-            parsedJson.update(_temp1)
-            jsonResponse = json.dumps(parsedJson)
+            employees.append({"name":employee.name, "monthly_payment":calculate_payment(employee)})
         # Serialize list of Employees item from Django queryset object to JSON formatted data
-        read_serializer = EmployeeSerializer(queryset, many=True)
     # if there is something in items else raise error
-    if read_serializer.data:
-        return Response(json.loads(jsonResponse))
-    else:
-        return Response(read_serializer.errors, status=400)
+    return render(request, 'list_employees.html',{'employees': employees})
 
 @api_view(['POST'])
 def add_employee(request):
@@ -222,11 +251,12 @@ def view_member(request):
 
 @api_view(['POST'])
 def create_member(request):
-    tm_serializer = TMSerializer(data=request.data)
+    #tm_serializer = TMSerializer(data=request.data)
+    tm_serializer = TMSerializer(data={'team': Team.objects.get(teamTitle=request.data.get("team", "")).id, 'member': Employee.objects.get(name=request.data.get("employee", "")).id})
     # validate user POST data
     if tm_serializer.is_valid():
         # If user data is valid, create a new WorkArrangement item record in the database
-        tm_item_object = tm_serializer.create(tm_serializer.data)
+        tm_item_object = tm_serializer.create({'team': Team.objects.get(teamTitle=request.data.get("team", "")), 'member': Employee.objects.get(name=request.data.get("employee", ""))})
         # Serialize the team member item from a Python object to JSON format
         read_serializer = TMSerializer(tm_item_object)
         # Return a HTTP response with the newly created team member item data
@@ -295,17 +325,17 @@ def view_leader(request):
 
 @api_view(['POST'])
 def create_leader(request):
-    tm_serializer = TLSerializer(data=request.data)
+    tl_serializer = TLSerializer(data={'team': Team.objects.get(teamTitle=request.data.get("team", "")).id, 'leader': Employee.objects.get(name=request.data.get("employee", "")).id})
     # validate user POST data
-    if tm_serializer.is_valid():
+    if tl_serializer.is_valid():
         # If user data is valid, create a new WorkArrangement item record in the database
-        tm_item_object = tm_serializer.create(tm_serializer.data)
+        tl_item_object = tl_serializer.create({'team': Team.objects.get(teamTitle=request.data.get("team", "")), 'leader': Employee.objects.get(name=request.data.get("employee", ""))})
         # Serialize the team leader item from a Python object to JSON format
-        read_serializer = TLSerializer(tm_item_object)
+        read_serializer = TLSerializer(tl_item_object)
         # Return a HTTP response with the newly created team leader item data
         return Response(read_serializer.data, status=201)
     # If the users POST data is not valid, return a 400 response with an error message
-    return Response(tm_serializer.errors, status=400)
+    return Response(tl_serializer.errors, status=400)
 
 @api_view(['POST'])
 def update_leader(request, id):
